@@ -104,6 +104,9 @@ function ChatArea(props) {
                     }, 1000 * 15);
                 };
 
+                ws.current.onclose = (e) => {
+                    console.log("onClose",e)
+                }
                 ws.current.onmessage = event => {
                     event.data.arrayBuffer().then(buffer => {
                         var view = new DataView(buffer);
@@ -118,6 +121,9 @@ function ChatArea(props) {
                                 var nextSize = view.getUint32(pos) - 16
                                 const text = new TextDecoder().decode(decompressed.slice(pos + 16, pos + 16 + nextSize));
                                 var obj = JSON.parse(text);
+                                if (obj.cmd === "COMBO_SEND") {
+                                    console.log(obj);
+                                }
                                 if (obj.cmd === "COMBO_SEND AND 0" || obj.cmd === "SEND_GIFT" || obj.cmd === "DANMU_MSG" || obj.cmd === 'GUARD_BUY' || obj.cmd === 'SUPER_CHAT_MESSAGE') {
                                     //console.log(obj)
                                     const event = {

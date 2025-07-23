@@ -6,10 +6,11 @@
 // @author       熊二
 // @match           *://live.bilibili.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=tampermonkey.net
-// @grant        none
 // @run-at       document-start
+// @grant        GM_xmlhttpRequest
 // @require      https://cdn.jsdelivr.net/npm/spark-md5@3.0.2/spark-md5.min.js
 // @require      https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js
+// @connect     apibackup2.aicu.cc:88
 // ==/UserScript==
 
 (function () {
@@ -230,6 +231,19 @@
                     "data": response.data.data.result.live_room
                 },event.origin)
             })
+        }
+
+        if (msg.action === "medals") {
+            GM_xmlhttpRequest({
+                method: "GET",
+                url: "https://apibackup2.aicu.cc:88/api/v3/user/getmedal?uid=" + msg.data,
+                onload: function(response) {
+                    event.source.postMessage({
+                        "action": "medals",
+                        data:JSON.parse(response.responseText)
+                    },event.origin)
+                }
+            });
         }
 
 

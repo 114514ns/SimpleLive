@@ -1,6 +1,6 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import "tailwindcss";
+/* Note: You may need to change the path to fit your project structure */
+@config "../tailwind.config.js";
 
 html body {
     margin: 0;

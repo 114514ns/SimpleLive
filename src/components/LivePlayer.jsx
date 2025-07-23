@@ -65,20 +65,25 @@ function LivePlayer(props) {
                 }
             }
         });
+        var timer = setInterval(function () {
+            if (ref.current && ref.current.offsetHeight > ref.current.offsetWidth*1.5) {
+                setMode('v')
+            }
+        },200)
         return () => {
             hls.destroy();
+            clearInterval(timer);
+            setMode('h')
             hlsRef.current = null;
             console.log("HlsPlayer destroyed");
         };
     }, [stream])
+    const [mode,setMode] = React.useState("h")
     return (
-        <div className={'w-full'}>
-
-            <video className={'w-full'} ref={ref} controlsList="nodownload  noremoteplayback noplaybackrate"
+            <video className={mode === 'h'?"w-full":'h-3/4'} ref={ref} controlsList="nodownload  noremoteplayback noplaybackrate"
                    autoPlay={true} controls allowFullScreen>
-
             </video>
-        </div>
+
     );
 }
 
