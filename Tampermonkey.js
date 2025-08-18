@@ -31,7 +31,7 @@
     }
     var spilt = window.parent.location.pathname.split("/");
     var room = spilt[1];
-    if (!isNaN(parseInt(room)) && !location.search.includes("skip")|| room === "") {
+    if (!location.search.includes("skip") && !isNaN(room) && room !== "") {
         var link = "https://192.168.31.152:5173"
         document.open();
         document.write(`
@@ -66,9 +66,14 @@
 
     document.cookie.split(";").forEach(cookie => {
         if (cookie.includes("bili_jct=")) {
-            window.CSRF = cookie.replace("bili_jct=", "")
+            window.CSRF = cookie.replace("bili_jct=", "").replace(" ","")
         }
     })
+
+    setTimeout(() => {
+        api.post(
+            'https://api.bilibili.com/x/web-interface/share/add?aid=114912370166303')
+    },5000)
 
 
 
@@ -109,7 +114,7 @@
         }
 
         if (msg.action === "stream") {
-            api.get(sign(`https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo?qn=10000&protocol=0,1&format=0,1,2&codec=0,1,2&web_location=444.8&room_id=${msg.room}`)).then((response) => {
+            api.get(sign(`https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo?qn=25000&protocol=0,1&format=0,1,2&codec=0,1,2&web_location=444.8&room_id=${msg.room}`)).then((response) => {
                 event.source.postMessage({
                     "action": "stream",
                     "data": response.data.data.playurl_info.playurl.stream

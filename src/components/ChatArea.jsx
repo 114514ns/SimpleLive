@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Card, CardBody, CardFooter, Chip, Tooltip} from "@heroui/react";
+import {addToast, Card, CardBody, CardFooter, Chip, Tooltip} from "@heroui/react";
 import {AnimatePresence, motion} from "motion/react"
 
 const brotli = await import("https://unpkg.com/brotli-wasm@3.0.0/index.web.js?module").then(m => m.default);
@@ -47,6 +47,8 @@ window.getGuardIcon = (level) => {
 
 
 function ChatArea(props) {
+
+    window.ERROR  = false
 
 
     function buildMessage(body, type) {
@@ -100,7 +102,19 @@ function ChatArea(props) {
                     }), 7));
 
                     timer.current = setInterval(() => {
-                        ws.current.send(buildMessage('IKUN', 2));
+                        try {
+                            ws.current.send(buildMessage('IKUN', 2))
+                        } catch (e) {
+                            if (window.ERROR === false) {
+                                window.ERROR = true;
+                                addToast({
+                                    title: "Toast title",
+                                    description: "Toast displayed successfully",
+                                    color: 'danger',
+                                })
+                            }
+                        }
+
                     }, 1000 * 15);
                 };
 
@@ -217,7 +231,7 @@ function ChatArea(props) {
                                         event.ActionName = 'sc'
                                         event.Time = new Date(obj.data.start_time * 1000)
                                         event.EndTime = new Date(obj.data.end_time * 1000)
-                                        event.UID = obj.data.uid
+                                        event.FromId = obj.data.uid
                                         event.Message = obj.data.message
                                         event.GiftPrice = obj.data.price
                                         if (obj.data.uinfo.medal) {
@@ -236,8 +250,8 @@ function ChatArea(props) {
                                         event.GiftName = obj.data.gift_name
                                         event.GiftPrice = obj.data.price / 1000
                                         event.GiftAmount = obj.data.num
-                                        event.UName = obj.data.username
-                                        event.UID = obj.data.uid
+                                        event.FromName = obj.data.username
+                                        event.FromId = obj.data.uid
                                         event.Face = `https://workers.vrp.moe/bilibili/avatar/${event.UID}`
                                         event.Time = new Date()
 
@@ -279,15 +293,14 @@ function ChatArea(props) {
         };
     }, [props.room]);
     return (
-        <div className={'overflow-y-scroll ml-8 overflow-x-hidden'}
+        <div className={'overflow-y-scroll ml-8 overflow-x-hidden flex flex-col'}
              style={props.expand ? {height: '70vh'} : {height: '95vh'}}>
             <AnimatePresence initial={false}>
                 {eventList.slice(0, 200).map(e => (
                     <motion.div
                         key={e.UUID}
-                        initial={{opacity: 0, x: 40}}
-                        animate={{opacity: 1, x: 0}}
-                        exit={{opacity: 0, x: -20}} // 添加 exit 动画
+                        initial={{opacity: 0, y: 0}}
+                        animate={{opacity: 1, y: 40}}
                         transition={{duration: 0.5}}
                     >
                         <ChatItem item={e}/>
@@ -342,8 +355,8 @@ function ChatItem(props) {
                         style={{width: '40px', height: '40px', borderRadius: '50%'}}
                         onClick={() => toSpace(item.FromId)}
                     />
-                    <div className={'ml-2'}>
-                        <div>
+                    <div className={'ml-2 w-full'}>
+                        <div className={'w-full'}>
                             <div className={'flex justify-between w-full'}>
                                 <p className={'font-bold'}>{item.FromName}</p>
                                 {item.ActionName === 'sc' && (<p className={'font-bold'}>￥{item.GiftPrice}</p>)}
@@ -351,6 +364,7 @@ function ChatItem(props) {
 
                             {item.MedalName && (
                                 <Chip
+                                    className={'hover:scale-105 transition-transform '}
                                     startContent={item.GuardLevel ? <img src={getGuardIcon(item.GuardLevel)} style={{
                                         width: '20px',
                                         height: '20px'

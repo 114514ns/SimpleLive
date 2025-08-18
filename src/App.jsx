@@ -42,11 +42,15 @@ function App() {
 
 
     const sendMessage = () => {
+        if (msg === "") {
+            return
+        }
         window.parent.postMessage({
             'action': 'msg',
             "room":current,
             "text": msg,
         },"*")
+        setMsg("")
     }
 
     useEffect(() => {

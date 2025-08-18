@@ -1,89 +1,111 @@
-import React, {useEffect} from 'react';
-import Hls from "hls.js";
-import shaka from 'shaka-player';
+import React, { useEffect, useRef, useState } from 'react';
+import videojs from 'video.js';
+import 'video.js/dist/video-js.css';
+import Hls from 'hls.js';
 
-function LivePlayer(props) {
-
-    const [stream, setStream] = React.useState("");
-
-    const ref = React.createRef();
-
-    const hlsRef = React.createRef();
-
-    const flvRef = React.createRef()
+function LivePlayer({ room }) {
+    const [stream, setStream] = useState("");
+    const [mode, setMode] = useState("h");
+    const videoRef = useRef(null);   // <video> 元素引用
+    const playerRef = useRef(null);  // video.js 实例
+    const hlsRef = useRef(null);     // Hls.js 实例
 
     useEffect(() => {
-        console.log("props callback")
-        window.parent.postMessage({
-            "action": "stream",
-            "room": props.room
-        }, "*")
+        window.parent.postMessage({ action: "stream", room }, "*");
 
-        window.addEventListener("message", (e) => {
+        const handleMessage = (e) => {
             if (e.data.action === "stream") {
+                let object;
                 if (e.data.data.length === 2) {
-                    var object = e.data.data[1].format[1].codec[0]
-
+                    var qn1 = e.data.data[1].format[1].codec[0].qn
+                    var qn2 = e.data.data[1].format[1].codec[1]?.qn
+                    if (qn1 <qn2) {
+                        object = e.data.data[1].format[1].codec[1]
+                    } else {
+                        object = e.data.data[1].format[1].codec[0]
+                    }
                 } else {
-                    var object = e.data.data[0].format[0].codec[0]
+                    object = e.data.data[0].format[0].codec[0];
                 }
-                setStream(object.url_info[0].host + object.base_url + object.url_info[0].extra)
+                console.log("current stream ",object);
+                setStream(object.url_info[0].host + object.base_url + object.url_info[0].extra);
             }
-        }, {
-            once: true
-        })
-    }, [props.room])
-    useEffect(() => {
+        };
 
-        console.log("stream callback")
-        if (!hlsRef.current) {
-            var hls = new Hls({
-                maxBufferLength: 30,        // 默认是 30 秒，可适当减小为 15 秒或更少
-                maxBufferSize: 30 * 1000 * 1000, // 默认无限，可设置最大 buffer 大小（单位：字节）
-                maxMaxBufferLength: 60,     // 最大不超过 60 秒，防止缓冲飙升
-                enableWorker: false,
-                lowLatencyMode:true
-            });
+        window.addEventListener("message", handleMessage, { once: true });
+        return () => window.removeEventListener("message", handleMessage);
+    }, [room]);
+
+    useEffect(() => {
+        if (!videoRef.current || playerRef.current) return;
+
+        playerRef.current = videojs(videoRef.current, {
+            autoplay: true,
+            controls: true,
+            preload: 'auto',
+            liveui: true,
+            fluid: true,
+        });
+
+        // 横竖屏判断
+        playerRef.current.on('loadedmetadata', () => {
+            const videoEl = videoRef.current;
+            setMode(videoEl.videoHeight > videoEl.videoWidth ? "v" : "h");
+        });
+
+        return () => {
+            if (playerRef.current) {
+                playerRef.current.dispose();
+                playerRef.current = null;
+            }
+        };
+    }, []);
+    useEffect(() => {
+        if (!stream || !videoRef.current) return;
+
+        // 如果之前有 Hls 实例，先销毁
+        if (hlsRef.current) {
+            hlsRef.current.destroy();
+            hlsRef.current = null;
         }
 
-        hls.loadSource(stream);
-        hls.attachMedia(ref.current);
-        hlsRef.current = hls;
-        hls.on(Hls.Events.ERROR, function (event, data) {
-            if (data.fatal) {
-                switch (data.type) {
-                    case Hls.ErrorTypes.NETWORK_ERROR:
-                        hls.startLoad(); // 尝试恢复网络错误
-                        break;
-                    case Hls.ErrorTypes.MEDIA_ERROR:
-                        hls.recoverMediaError(); // 尝试恢复解码错误
-                        break;
-                    default:
-                        hls.destroy(); // 销毁重建
-                        initPlayer();
-                        break;
-                }
-            }
-        });
-        var timer = setInterval(function () {
-            if (ref.current && ref.current.offsetHeight > ref.current.offsetWidth*1.5) {
-                setMode('v')
-            }
-        },200)
-        return () => {
-            hls.destroy();
-            clearInterval(timer);
-            setMode('h')
-            hlsRef.current = null;
-            console.log("HlsPlayer destroyed");
-        };
-    }, [stream])
-    const [mode,setMode] = React.useState("h")
-    return (
-            <video className={mode === 'h'?"w-full":'h-3/4'} ref={ref} controlsList="nodownload  noremoteplayback noplaybackrate"
-                   autoPlay={true} controls allowFullScreen>
-            </video>
+        if (Hls.isSupported()) {
+            const hls = new Hls({
+                // 低延迟优化
+                maxBufferLength: 15,
+                maxMaxBufferLength: 30,
+                lowLatencyMode: true,
+                liveSyncDurationCount: 3,
+                liveMaxLatencyDurationCount: 5,
+                enableWorker: true,
+            });
+            hls.loadSource(stream);
+            hls.attachMedia(videoRef.current);
+            hlsRef.current = hls;
+        } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
+            videoRef.current.src = stream;
+        }
 
+        return () => {
+            if (hlsRef.current) {
+                hlsRef.current.destroy();
+                hlsRef.current = null;
+            }
+        };
+    }, [stream]);
+
+    return (
+        <div className="flex justify-center">
+            <video
+                ref={videoRef}
+                className="video-js vjs-big-play-centered"
+                playsInline
+                style={{
+                    height: mode === 'h' ? '' : '85vh',
+                    width: '100%'
+                }}
+            />
+        </div>
     );
 }
 
