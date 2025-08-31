@@ -72,6 +72,51 @@ window.getColor = (level) => {
 
 }
 
+/*
+const originalFetch = window.fetch;
+
+window.fetch = async function (...args) {
+    const response = await originalFetch.apply(this, args);
+    if (args[0].url.includes('index.m3u8')) {
+        const clone = response.clone();
+
+        const text = await clone.text();
+        const u = new URL(this._url);
+
+        let newResponse = "";
+        var path = ""
+        u.pathname.split("/").forEach((p,index) => {
+            if (!p.includes("index.m3u8")) {
+                path+=p + "/";
+            }
+        })
+        text.split("\n").forEach(line => {
+            if (line.includes("#") && !line.includes("EXT-X-MAP:URI")) {
+                newResponse += line + "\r\n";
+            } else if (line.trim() !== "" && !line.includes("EXT-X-MAP:URI")) {
+                newResponse += "https://" +u.host +path+"/" +line  + u.search + "\r\n";
+            } else {
+
+            }
+        });
+
+        const res = new Response(newResponse, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers,
+        });
+
+        return res;
+
+    }
+
+
+    return response;
+};
+
+
+ */
+
 ReactDOM.createRoot(document.getElementById("root")).render(
       <HeroUIProvider>
         <App />

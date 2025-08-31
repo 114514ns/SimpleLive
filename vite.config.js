@@ -5,7 +5,13 @@ import basicSsl from '@vitejs/plugin-basic-ssl'
 import tailwindcss from "@tailwindcss/vite"
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), tsconfigPaths(),basicSsl(), tailwindcss()],
+  plugins: [    react({
+    babel: {
+      plugins: [
+        ["babel-plugin-react-compiler", ReactCompilerConfig],
+      ],
+    },
+  }), tsconfigPaths(),basicSsl(), tailwindcss()],
   build: {
     target: "ES2022"
   },

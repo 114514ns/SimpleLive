@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
-import Hls from 'hls.js';
+import {Hls,FetchLoader} from 'hls.js';
 
 function LivePlayer({ room }) {
     const [stream, setStream] = useState("");
@@ -78,6 +78,7 @@ function LivePlayer({ room }) {
                 liveSyncDurationCount: 3,
                 liveMaxLatencyDurationCount: 5,
                 enableWorker: true,
+                loader: FetchLoader,
             });
             hls.loadSource(stream);
             hls.attachMedia(videoRef.current);

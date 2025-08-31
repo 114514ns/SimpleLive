@@ -33,6 +33,7 @@
     var room = spilt[1];
     if (!location.search.includes("skip") && !isNaN(room) && room !== "") {
         var link = "https://192.168.31.152:5173"
+        link = "https://simple-live-omega.vercel.app/"
         document.open();
         document.write(`
         <!DOCTYPE html>

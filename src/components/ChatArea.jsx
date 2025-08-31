@@ -2,8 +2,12 @@ import React, {useEffect, useRef, useState} from 'react';
 import {addToast, Card, CardBody, CardFooter, Chip, Tooltip} from "@heroui/react";
 import {AnimatePresence, motion} from "motion/react"
 
-const brotli = await import("https://unpkg.com/brotli-wasm@3.0.0/index.web.js?module").then(m => m.default);
 
+
+
+
+
+const brotli = await import("../brotli.js").then(m => m.default);
 
 function parseMessage(message, emojiMap) {
     const regex = /\[([^\[\]]+)\]/g;
@@ -435,3 +439,5 @@ const CheckIcon = React.memo(({size = 24, color = "currentColor", ...props}) => 
 });
 
 export default ChatArea;
+
+
