@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
-import basicSsl from '@vitejs/plugin-basic-ssl'
+import mkcert from 'vite-plugin-mkcert'
 import tailwindcss from "@tailwindcss/vite"
 const ReactCompilerConfig = { /* ... */ };
 // https://vitejs.dev/config/
@@ -12,8 +12,11 @@ export default defineConfig({
         ["babel-plugin-react-compiler", ReactCompilerConfig],
       ],
     },
-  }), tsconfigPaths(),basicSsl(), tailwindcss()],
+  }), tsconfigPaths(), tailwindcss(),mkcert()],
   build: {
     target: "ES2022"
   },
+  server: {
+    https: true,
+  }
 });
