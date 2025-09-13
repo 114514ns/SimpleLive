@@ -38,37 +38,36 @@ window.addEventListener("message", function (event) {
 })
 
 window.getColor = (level) => {
-    if (level <= 4) {
-        return "#5762A799"
-    }
-    if (level <= 8) {
-        return "#5866C799"
-    }
-    if (level <= 12) {
-        return "#9BA9EC"
-    }
-    if (level <= 16) {
-        return "#DA9AD8"
+    if (level <= 10) {
+        return "#727BB5"
     }
     if (level <= 20) {
-        return "#C79D24"
+        return "#CF86B2"
     }
-    if (level <= 24) {
-        return "#67C0E7"
+    if (level <= 30) {
+        return "#5EC0F7"
     }
-    if (level <= 28) {
-        return "#6C91F2"
+    if (level <= 40) {
+        return "#6992FF"
     }
-    if (level <= 32) {
-        return "#A97EE8"
+    if (level <= 50) {
+        return "#AA78F1"
     }
-    if (level <= 36) {
-        return "#C96B7E"
+    if (level <= 60) {
+        return "#ED5674"
+    }
+    if (level <= 70) {
+        return "#F58737"
+    }
+    if (level <= 80) {
+        return "#F58837"
+    }
+    if (level <= 90) {
+        return "#F58837"
     }
     if (level <= 40) {
         return "#FF9D55"
     }
-
 
 }
 

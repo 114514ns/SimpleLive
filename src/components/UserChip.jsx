@@ -15,7 +15,7 @@ function UserChip(props) {
 
 
     return (
-        <Tooltip content={<HoverMedals id={props.item.UID}/>}>
+        <Tooltip delay={1000} content={<HoverMedals id={props.item.UID}/>}>
             <div className={'mt-3'}>
                 <span className={'font-bold'}>{props.item.UName}</span>
                 <div className={'flex flex-row align-middle mt-1'}>

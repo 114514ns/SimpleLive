@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
 import {Hls,FetchLoader} from 'hls.js';
+import ReactPlayer from 'react-player'
 
 function LivePlayer({ room }) {
     const [stream, setStream] = useState("");
@@ -11,10 +12,13 @@ function LivePlayer({ room }) {
     const hlsRef = useRef(null);     // Hls.js 实例
 
     useEffect(() => {
+        console.log("LivePlayer refresh");
         window.parent.postMessage({ action: "stream", room }, "*");
+        console.log("Post stream")
 
         const handleMessage = (e) => {
             if (e.data.action === "stream") {
+                console.log("Receive Stream")
                 let object;
                 if (e.data.data.length === 2) {
                     var qn1 = e.data.data[1].format[1].codec[0].qn
@@ -97,8 +101,9 @@ function LivePlayer({ room }) {
 
     return (
         <div className="flex justify-center">
-            <video
-                ref={videoRef}
+            <ReactPlayer
+                //ref={videoRef}
+                src={stream}
                 className="video-js vjs-big-play-centered"
                 playsInline
                 style={{

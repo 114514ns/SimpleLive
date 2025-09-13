@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {addToast, Card, CardBody, CardFooter, Chip, Tooltip} from "@heroui/react";
 import {AnimatePresence, motion} from "motion/react"
+import HoverMedals from "./HoverMedals.jsx";
 
 
 
@@ -90,7 +91,6 @@ function ChatArea(props) {
 
         function handleMessage(event) {
             if (event.data.action === "websocket") {
-                console.log("Received message", event.data);
                 window.removeEventListener("message", handleMessage);
 
                 ws.current = new WebSocket("wss://broadcastlv.chat.bilibili.com:2245/sub");
@@ -123,7 +123,7 @@ function ChatArea(props) {
                 };
 
                 ws.current.onclose = (e) => {
-                    console.log("onClose",e)
+                    //console.log("onClose",e)
                 }
                 ws.current.onmessage = event => {
                     event.data.arrayBuffer().then(buffer => {
@@ -367,23 +367,25 @@ function ChatItem(props) {
                             </div>
 
                             {item.MedalName && (
-                                <Chip
-                                    className={'hover:scale-105 transition-transform '}
-                                    startContent={item.GuardLevel ? <img src={getGuardIcon(item.GuardLevel)} style={{
-                                        width: '20px',
-                                        height: '20px'
-                                    }}></img> : <CheckIcon size={18}/>}
-                                    variant="faded"
-                                    style={{background: item.MedalColor, color: 'white'}}
-                                    onClick={() => {
-                                        item.MedalLiver && toSpace(item.MedalLiver)
-                                    }}
-                                >
-                                    {item.MedalName}
-                                    <span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full">
+                                <Tooltip content={<HoverMedals id={item.FromId}/>}>
+                                    <Chip
+                                        className={'hover:scale-105 transition-transform '}
+                                        startContent={item.GuardLevel ? <img src={getGuardIcon(item.GuardLevel)} style={{
+                                            width: '20px',
+                                            height: '20px'
+                                        }}></img> : <CheckIcon size={18}/>}
+                                        variant="faded"
+                                        style={{background: item.MedalColor, color: 'white'}}
+                                        onClick={() => {
+                                            item.MedalLiver && toSpace(item.MedalLiver)
+                                        }}
+                                    >
+                                        {item.MedalName}
+                                        <span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full">
                                                             {item.MedalLevel}
                                                         </span>
-                                </Chip>
+                                    </Chip>
+                                </Tooltip>
                             )}
                         </div>
                         <div style={{marginLeft: "8px"}}>

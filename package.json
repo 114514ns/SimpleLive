@@ -39,7 +39,7 @@
     "motion": "^12.23.3",
     "react": "19.1.1",
     "react-dom": "19.1.1",
-    "react-player": "^3.1.0",
+    "react-player": "^3.3.2",
     "react-resizable-panels": "^3.0.3",
     "react-router-dom": "6.23.0",
     "shaka-player": "^4.15.6",

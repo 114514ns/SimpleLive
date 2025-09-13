@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Card, CardBody, Tab, Tabs} from "@heroui/react";
+import {Card, CardBody, Tab, Tabs, Tooltip} from "@heroui/react";
 import UserChip from "./UserChip.jsx";
+import HoverMedals from "./HoverMedals.jsx";
 
 function WatcherTab(props) {
 
@@ -109,6 +110,7 @@ function WatcherTab(props) {
                         }).map((item, i) => {
                             return (
                                 <UserChip item={item} key={i} />
+
                             )
                         })}
                     </div>
