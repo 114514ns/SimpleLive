@@ -25,15 +25,13 @@
         var s = search.split("&").sort().join("&")
         var rid = SparkMD5.hash(s + "ea1db124af3c7062474693fa704f4ff8")
 
-        console.log(s)
-
         return "https://" + u.host + u.pathname + "?" + s + "&w_rid=" + rid
     }
     var spilt = window.parent.location.pathname.split("/");
     var room = spilt[1];
     if (!location.search.includes("skip") && !isNaN(room) && room !== "") {
-        var link = "https://192.168.31.152:5173"
-        link = "https://simple-live-omega.vercel.app/"
+        var link = "https://localhost:5173"
+        //link = "https://simple-live-omega.vercel.app/"
         document.open();
         document.write(`
         <!DOCTYPE html>
@@ -115,16 +113,23 @@
         }
 
         if (msg.action === "stream") {
+
             api.get(sign(`https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo?qn=25000&protocol=0,1&format=0,1,2&codec=0,1,2&web_location=444.8&room_id=${msg.room}`)).then((response) => {
-                event.source.postMessage({
-                    "action": "stream",
-                    "data": response.data.data.playurl_info.playurl.stream
-                }, event.origin)
+                if (response.data.data) {
+                    var d = response.data.data.playurl_info.playurl.stream
+                    event.source.postMessage({
+                        "action": "stream",
+                        "data": d
+                    }, event.origin)
+                }
+
             })
         }
 
         if (msg.action === "websocket") {
-            api.get(sign('https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?type=0&id=' + msg.room)).then((response) => {
+            api.get( sign('https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?type=0&id=' + msg.room),{
+                withCredentials: false
+            }).then((response) => {
                 event.source.postMessage({
                     "action": "websocket",
                     "data": response.data.data
@@ -207,18 +212,15 @@
             )
         }
 
-        if (msg.action === 'fans-club') {
+        if (msg.action === 'admins') {
             var room = msg.room
-            getRuid(room).then(ruid => {
-                    api.get(`https://api.live.bilibili.com/xlive/general-interface/v1/rank/getFansMembersRank?ruid=${ruid}&page=1&page_size=30&rank_type=2&ts=114514`).then((response) => {
-                        event.source.postMessage({
-                            "action": "fans-club",
-                            "data": response.data.data
-                        }, event.origin)
+            api.get(`https://api.live.bilibili.com/xlive/web-room/v1/roomAdmin/get_by_room?roomid=${room}&page_size=30`).then((response) => {
+                event.source.postMessage({
+                    "action": "admins",
+                    "data": response.data.data.data
+                }, event.origin)
 
-                    })
-                }
-            )
+            })
         }
 
         if (msg.action === "recommend") {
@@ -235,6 +237,14 @@
                 event.source.postMessage({
                     "action": "search",
                     "data": response.data.data.result.live_room
+                },event.origin)
+            })
+        }
+        if (msg.action === "history") {
+            api.get(`https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory?roomid=${msg.room}`).then((response) => {
+                event.source.postMessage({
+                    "action": "history",
+                    "data": response.data.data.admin.concat(response.data.data.room)
                 },event.origin)
             })
         }

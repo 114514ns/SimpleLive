@@ -31,7 +31,7 @@ function LivePlayer({room}) {
             }
         };
 
-        window.addEventListener("message", handleMessage, {once: true});
+        window.addEventListener("message", handleMessage);
         return () => window.removeEventListener("message", handleMessage);
     }, [room]);
 

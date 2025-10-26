@@ -9,11 +9,12 @@ function WatcherTab(props) {
 
     const [guardCount,setGuardCount] = useState(0)
 
-    const [fansCount,setFansCount] = useState(0)
 
     const [onlineList,setOnlineList] = useState([])
 
     const [guardList,setGuardList] = useState([])
+
+    const [admins,setAdmins] = useState([])
 
     const timer = useRef()
 
@@ -50,8 +51,8 @@ function WatcherTab(props) {
             })
             setGuardList(dst)
         }
-        if (e.data.action === "fans-club") {
-            setFansCount(e.data.data.num)
+        if (e.data.action === "admins") {
+            setAdmins(e.data.data)
         }
     }
 
@@ -66,7 +67,7 @@ function WatcherTab(props) {
             "room":props.room
         },"*")
         window.parent.postMessage({
-            "action":"fans-club",
+            "action":"admins",
             "room":props.room
         },"*")
         window.parent.postMessage({
@@ -126,13 +127,17 @@ function WatcherTab(props) {
                         })}
                     </div>
                 </Tab>
-                <Tab key="videos" title={`粉丝团：${fansCount}`}>
-                    <Card>
-                        <CardBody>
-                            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-                            mollit anim id est laborum.
-                        </CardBody>
-                    </Card>
+                <Tab key="videos" title={`房管：${admins.length??0}`}>
+                    <div className={'h-full overflow-y-scroll overflow-x-hidden'} style={{height:'20vh'}}>
+                        {admins.map((item, i) => {
+                            item.UID = item.uid
+                            item.Face = item.face
+                            item.UName = item.uname
+                            return (
+                                <UserChip item={item} key={i} />
+                            )
+                        })}
+                    </div>
                 </Tab>
             </Tabs>
         </div>

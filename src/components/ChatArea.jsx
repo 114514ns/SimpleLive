@@ -87,17 +87,18 @@ function ChatArea(props) {
         window.parent.postMessage({
             "action": "websocket",
             "room": props.room,
+            "anonymous":getConfig().Anonymous
         }, "*")
 
         function handleMessage(event) {
             if (event.data.action === "websocket") {
-                window.removeEventListener("message", handleMessage);
+                //window.removeEventListener("message", handleMessage);
 
                 ws.current = new WebSocket("wss://broadcastlv.chat.bilibili.com:2245/sub");
 
                 ws.current.onopen = () => {
                     ws.current.send(buildMessage(JSON.stringify({
-                        uid: parseInt(window.MID),
+                        uid: getConfig().Anonymous?0:parseInt(window.MID),
                         roomid: parseInt(props.room),
                         key: event.data.data.token,
                         type: 2,
@@ -283,25 +284,50 @@ function ChatArea(props) {
                     })
                 };
             }
+            if (event.data.action === "history") {
+                var array = event.data.data
+                var DEPTH = 30
+                const cpy = [...eventList];
+                setEventList(prev => {
+                    return prev.map(item => {
+                        const match = array.find(a => a.user.base.face === item.Face);
+                        if (match) {
+                            return { ...item, FromName: match.user.base.name }; // 生成新对象
+                        }
+                        return item; // 保持不变
+                    });
+                });
+            }
         }
 
         window.addEventListener("message", handleMessage);
+        var history = setInterval(() => {
+            if (props.room) {
+                window.parent.postMessage({
+                    "action": "history",
+                    "room": props.room,
+                }, "*")
+            }
+
+        },500)
         return () => {
             if (ws.current) {
                 ws.current.close();
             }
             if (timer.current) {
                 clearInterval(timer.current);
+                clearInterval(history)
             }
             //setEventList([])
         };
     }, [props.room]);
     return (
-        <div className={'overflow-y-scroll ml-8 overflow-x-hidden flex flex-col'}
+        <div className={'items-center overflow-y-scroll ml-8 overflow-x-hidden flex flex-col'}
              style={props.expand ? {height: '70vh'} : {height: '95vh'}}>
             <AnimatePresence initial={false}>
                 {eventList.slice(0, 200).map(e => (
                     <motion.div
+                        className={'w-[100%]'}
                         key={e.UUID}
                         initial={{opacity: 0, y: 0}}
                         animate={{opacity: 1, y: 40}}
@@ -347,7 +373,7 @@ function ChatItem(props) {
         }
     }, []);
     return (
-        <Card style={{width: "90%", marginTop: "10px", background: style}}
+        <Card style={{width:'100%', marginTop: "10px", background: style}}
               isHoverable
               key={`${item.UUID}`}
 
