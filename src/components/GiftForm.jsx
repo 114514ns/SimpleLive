@@ -7,21 +7,30 @@ function GiftForm(props) {
 
     const [liver,setLiver] = useState('');
 
+    const [ruid,setRuid] = useState('');
+
+    const [id,setId] = useState('');
+
     useEffect(() => {
 
         window.parent.postMessage({action: "room-info", room: props.room}, "*");
-        window.addEventListener("message", function (event) {
+        function handleMessage(event) {
             if (event.data.action === "room-info") {
                 if (!isNaN(parseFloat(ROOM_ID))) {
-                    const object = event.data.data.data.by_room_ids[window.ROOM_ID]
-                    setLiver(object.uname,)
+                    const object = event.data.data.data.by_room_ids[window.ROOM_ID];
+                    setLiver(object.uname);
+                    ROOM_UID_MAP.set(props.room, object.uid);
                 }
             }
-        },{
-            once:true
-        })
-        console.log(props)
-    },[])
+        }
+
+
+        window.addEventListener("message", handleMessage);
+
+        return () => {
+            window.removeEventListener("message", handleMessage);
+        };
+    }, [props.room]);
     return (
         <div>
             <Modal isOpen={true}>
@@ -46,7 +55,31 @@ function GiftForm(props) {
                             <Button color="danger" variant="light" onPress={props.onClose}>
                                 关闭
                             </Button>
-                            <Button color="primary" onPress={props.onClose}>
+                            <Button color="primary" onPress={() => {
+
+                                var ids = props.cookies
+
+                                var cookies = []
+                                var array = []
+                                for (const v of props.cookies) {
+                                    array.push(v)
+                                }
+                                ids.forEach(id => {
+                                    var cookie = getConfig().Accounts[id].Cookie
+                                    window.parent.postMessage({
+                                        action: "gift",
+                                        room: props.room,
+                                        ruid:ROOM_UID_MAP.get(props.room),
+                                        num: amount,
+                                        gift_id:props.item.id,
+                                        cookie:cookie,
+                                        price:props.item.price
+
+                                    }, "*");
+                                })
+
+                                props.onClose
+                            }}>
                                 确认
                             </Button>
                         </ModalFooter>

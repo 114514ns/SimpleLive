@@ -12,6 +12,8 @@ window.toSpace = (id) => {
     window.open("https://space.bilibili.com/" + id)
 }
 window.UID_MAP = new Map()
+
+window.ROOM_UID_MAP = new Map()
 window.getConfig = () => {
     const content = localStorage.getItem("config")
     if (content === null || JSON.parse(content) === null) {

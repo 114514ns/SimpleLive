@@ -44,6 +44,10 @@ function App() {
 
     const [showAcc,setShowAcc] = useState(false);
 
+    const [accs,setAccs] = useState([]);
+
+    const [selectedKeys,setSelectedKeys] = useState([]);
+
 
 
 
@@ -51,10 +55,16 @@ function App() {
         if (msg === "") {
             return
         }
+        var array = []
+        for (const v of selectedKeys) {
+            array.push(v)
+        }
+        var mid = array[0]
         window.parent.postMessage({
             'action': 'msg',
             "room":current,
             "text": msg,
+            "cookie": getConfig().Accounts[mid].Cookie
         },"*")
         setMsg("")
     }
@@ -67,8 +77,7 @@ function App() {
 
         window.parent.postMessage({action: "recommend"}, "*");
 
-
-
+        window.parent.postMessage({action: "nav",cookie:''}, "*");
 
         window.addEventListener("message", (event) => {
 
@@ -122,6 +131,24 @@ function App() {
                     })
                 })
                 setRecList(dst)
+            }
+
+            if (event.data.action === "nav") {
+                var mid = event.data.data.data.mid
+                if (mid) {
+                    var config = getConfig()
+                    if (!config.Accounts) {
+                        config.Accounts = {}
+                    }
+                    config.Accounts[mid] = {
+                        Cookie:'',
+                        UName:event.data.data.data.uname,
+                        UID: mid
+                    }
+                    setConfig(config)
+                }
+                setSelectedKeys([Object.values(getConfig().Accounts)[0].UID + ''])
+                setAccs(getConfig().Accounts)
             }
         })
     }, []);
@@ -183,7 +210,7 @@ function App() {
                         }} />}
                         {open&&<GiftForm onClose={() => {
                             setOpen(false);
-                        }} item={gift} room={current}/>}
+                        }} item={gift} room={current} cookies={selectedKeys}/>}
                         <LivePlayer room={current} />
                         <Input label="Send Message..."  endContent={
                             <div className={'flex'}>
@@ -195,16 +222,27 @@ function App() {
                                                 aria-label="Multiple selection example"
                                                 closeOnSelect={false}
                                                 selectionMode="multiple"
+                                                selectedKeys={selectedKeys}
                                                 variant="flat"
+                                                onSelectionChange={setSelectedKeys}
+                                                /*
                                                 onSelectionChange={(e) => {
                                                     console.log(e)
                                                 }}
+
+                                                 */
                                             >
-                                                <DropdownItem key="text">Text</DropdownItem>
-                                                <DropdownItem key="number">Number</DropdownItem>
-                                                <DropdownItem key="date">Date</DropdownItem>
-                                                <DropdownItem key="single_date">Single Date</DropdownItem>
-                                                <DropdownItem key="iteration">Iteration</DropdownItem>
+
+                                                {Object.values(accs).map((item) => {
+                                                    return (
+                                                        <DropdownItem key={item.UID}>
+                                                            <div>
+                                                                {item.UName}
+                                                                <Avatar src={'https://workers.vrp.moe/bilibili/avatar/' + item.UID}/>
+                                                            </div>
+                                                        </DropdownItem>
+                                                    )
+                                                })}
                                             </DropdownMenu>
                                         </Dropdown>
                                     </>

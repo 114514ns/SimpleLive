@@ -164,7 +164,18 @@
         }
 
         if (msg.action === "msg") {
-            api.post(sign('https://api.live.bilibili.com/msg/send?t=1'), {
+
+            var csrf = window.CSRF
+            if (msg.cookie !== '') {
+                var split = msg.cookie.split(';')
+                split.forEach(cookie => {
+                    if (cookie.includes('bili_jct=')) {
+                        csrf = cookie.replace("bili_jct=", "").trim()
+                    }
+                })
+            }
+
+            const formData = new URLSearchParams({
                 "bubble": 0,
                 "msg": msg.text,
                 "color": 16777215,
@@ -178,13 +189,38 @@
                 "fontsize": 25,
                 "rnd": Math.floor(new Date().getTime() / 1000),
                 "roomid": msg.room,
-                "csrf": window.CSRF,
-                "csrf_token": window.CSRF
-            },{
+                "csrf": csrf,
+                "csrf_token": csrf
+            }).toString();
+
+
+
+            var opt = {
+                method: "POST",
+                url: sign('https://api.live.bilibili.com/msg/send?t=1'),
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Cookie": msg.cookie,
+                    "Origin": "https://live.bilibili.com",
+                    "Referer": "https://live.bilibili.com/"
+                },
+                data: formData,
+                onload: (res) => {
+                    console.log("发送成功:", JSON.parse(res.responseText));
+                    event.source.postMessage({
+                        "action": "msg",
+                        "data": JSON.parse(res.responseText)
+                    }, event.origin);
+                },
+                onerror: (err) => {
+                    console.error("发送失败:", err);
                 }
-            })
+            }
+            if (msg.cookie !== '') {
+                opt.cookie = msg.cookie
+                opt.anonymous = true
+            }
+            GM_xmlhttpRequest(opt);
         }
 
         if (msg.action === "online") {
@@ -265,14 +301,12 @@
             });
         }
         if (msg.action === "nav") {
-            GM_xmlhttpRequest({
+            var opt = {
                 method: "GET",
                 url: "https://api.bilibili.com/x/web-interface/nav",
                 headers: {
 
                 },
-                cookie: msg.cookie,
-                anonymous: true,  // 关键：阻止自动发送浏览器Cookie
                 onload: (res) => {
                     console.log(res.responseText)
                     event.source.postMessage({
@@ -280,7 +314,67 @@
                         "data": JSON.parse(res.responseText)
                     },event.origin)
                 }
-            });
+            }
+            if (msg.cookie !== '') {
+                opt.cookie = msg.cookie
+                opt.anonymous = true
+            }
+            GM_xmlhttpRequest(opt);
+        }
+
+        if (msg.action === "gift") {
+            var csrf = window.CSRF
+            if (msg.cookie !== '') {
+                var split = msg.cookie.split(';')
+                split.forEach(cookie => {
+                    if (cookie.includes('bili_jct=')) {
+                        csrf = cookie.replace("bili_jct=", "").trim()
+                    }
+                })
+            }
+            const formData = new URLSearchParams({
+                "biz_id": msg.room,
+                "csrf": csrf,
+                "ruid":msg.ruid,
+                "gift_num":msg.num,
+                "gift_id":msg.gift_id,
+                "coin_type":'gold',
+                "bag_id":0,
+                'platform':'pc',
+                'biz_code':"Live",
+                "price":msg.price,
+
+            }).toString();
+
+            var opt = {
+                method: "POST",
+                url: ('https://api.live.bilibili.com/xlive/revenue/v1/gift/sendGold?' + formData),
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Cookie": msg.cookie,
+                    "Origin": "https://live.bilibili.com",
+                    "Referer": "https://live.bilibili.com/"
+                },
+                onload: (res) => {
+                    console.log("发送成功:", JSON.parse(res.responseText));
+                    event.source.postMessage({
+                        "action": "msg",
+                        "data": JSON.parse(res.responseText)
+                    }, event.origin);
+                },
+                onerror: (err) => {
+                    console.error("发送失败:", err);
+                }
+            }
+            if (msg.cookie !== '') {
+                opt.cookie = msg.cookie
+                opt.anonymous = true
+            }
+            GM_xmlhttpRequest(opt);
+        }
+
+        if (msg.action === "battery") {
+
         }
 
 
