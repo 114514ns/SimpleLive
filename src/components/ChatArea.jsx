@@ -6,8 +6,6 @@ import HoverMedals from "./HoverMedals.jsx";
 
 
 
-
-
 const brotli = await import("../brotli.js").then(m => m.default);
 
 function parseMessage(message, emojiMap) {
@@ -49,6 +47,8 @@ window.getGuardIcon = (level) => {
         "https://i1.hdslb.com/bfs/static/blive/blfe-live-room/static/img/logo-3.6d2f428..png"]
     return array[level]
 }
+
+
 
 
 function ChatArea(props) {
@@ -263,6 +263,9 @@ function ChatArea(props) {
 
                                     }
                                     console.log(obj)
+                                    if (event.FromId === 0) {
+
+                                    }
                                     setEventList(prev => {
                                         const now = new Date()
 
@@ -272,6 +275,17 @@ function ChatArea(props) {
                                         );
                                         const prioritized = list.filter(e => e.ActionName === 'sc' && new Date(e.EndTime) > now)
                                         const rest = list.filter(e => !(e.ActionName === 'sc' && new Date(e.EndTime) > now))
+
+                                        var DEPTH = Math.min(rest.length,30)
+                                        for(var i = 0; i < DEPTH; i++) {
+                                            if (rest[i].FromId === 0) {
+                                                var o2 = UID_MAP.get(rest[i].Face)
+                                                if (o2 !== undefined) {
+                                                    rest[i].FromId = o2.UID
+                                                    rest[i].FromName = o2.UName
+                                                }
+                                            }
+                                        }
 
                                         return [...prioritized, ...rest]
                                     })
@@ -286,17 +300,43 @@ function ChatArea(props) {
             }
             if (event.data.action === "history") {
                 var array = event.data.data
-                var DEPTH = 30
+                var DEPTH = Math.min(30,eventList.length)
                 const cpy = [...eventList];
+                array.forEach(e => {
+                    window.UID_MAP.set(e.user.base.face,{
+                        UID:e.uid,
+                        UName: e.user.base.name
+                    })
+                })
+                setEventList(prev => {
+                    var list = [...prev]
+
+                    var DEPTH = Math.min(list.length,30)
+                    for(var i = 0; i < DEPTH; i++) {
+                        if (list[i].FromId === 0) {
+                            var o2 = UID_MAP.get(list[i].Face)
+                            if (o2 !== undefined) {
+                                list[i].FromId = o2.UID
+                                list[i].FromName = o2.UName
+                            }
+                        }
+                    }
+
+                    return [ ...list]
+                })
+                //setEventList(cpy)
+                /*
                 setEventList(prev => {
                     return prev.map(item => {
                         const match = array.find(a => a.user.base.face === item.Face);
                         if (match) {
-                            return { ...item, FromName: match.user.base.name }; // 生成新对象
+                            return { ...item, FromName: match.user.base.name,FromId:match.uid }; // 生成新对象
                         }
                         return item; // 保持不变
                     });
                 });
+
+                 */
             }
         }
 

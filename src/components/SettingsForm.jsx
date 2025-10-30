@@ -35,14 +35,14 @@ function SettingsForm(props) {
                         <ModalHeader className="flex flex-col gap-1">设置</ModalHeader>
                         <ModalBody>
                             <div>
-                                <Switch defaultValue={getConfig().Anonymous} aria-label="匿名模式" onValueChange={e => {
+                                <Switch defaultSelected={getConfig().Anonymous} aria-label="匿名模式" onValueChange={e => {
                                     const cfg = getConfig();
                                     cfg.Anonymous = e
                                     setConfig(cfg)
                                 }
                                 }>匿名模式</Switch>
 
-                                <Autocomplete
+{/*                                <Autocomplete
                                     className="mt-4"
                                     defaultItems={ [
                                         {label: "0", key: "0"},
@@ -69,7 +69,7 @@ function SettingsForm(props) {
                                     isInvalid={topPriceState}
                                     color={topPriceState ? "danger" : "default"}
                                     errorMessage="Please enter a valid email"
-                                />
+                                />*/}
 
                             </div>
                         </ModalBody>
@@ -78,7 +78,7 @@ function SettingsForm(props) {
                                 Close
                             </Button>
                             <Button color="primary" onPress={props.onClose}>
-                                Action
+                                Save
                             </Button>
                         </ModalFooter>
                     </>

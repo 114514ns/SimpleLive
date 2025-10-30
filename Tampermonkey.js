@@ -11,6 +11,9 @@
 // @require      https://cdn.jsdelivr.net/npm/spark-md5@3.0.2/spark-md5.min.js
 // @require      https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js
 // @connect     apibackup2.aicu.cc:88
+// @connect     api.bilibili.com
+// @connect     api.live.bilibili.com
+// @connect     httpbin.org
 // ==/UserScript==
 
 (function () {
@@ -257,6 +260,24 @@
                     event.source.postMessage({
                         "action": "medals",
                         data:JSON.parse(response.responseText)
+                    },event.origin)
+                }
+            });
+        }
+        if (msg.action === "nav") {
+            GM_xmlhttpRequest({
+                method: "GET",
+                url: "https://api.bilibili.com/x/web-interface/nav",
+                headers: {
+
+                },
+                cookie: msg.cookie,
+                anonymous: true,  // 关键：阻止自动发送浏览器Cookie
+                onload: (res) => {
+                    console.log(res.responseText)
+                    event.source.postMessage({
+                        "action": "nav",
+                        "data": JSON.parse(res.responseText)
                     },event.origin)
                 }
             });
