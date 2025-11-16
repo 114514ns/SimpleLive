@@ -374,7 +374,25 @@
         }
 
         if (msg.action === "battery") {
-
+            var opt = {
+                method: "GET",
+                url: (
+                    'https://api.live.bilibili.com/xlive/web-ucenter/user/get_user_info'),
+                onload: (res) => {
+                    event.source.postMessage({
+                        "action": "battery",
+                        "data": JSON.parse(res.responseText)
+                    }, event.origin);
+                },
+                onerror: (err) => {
+                    console.error("发送失败:", err);
+                }
+            }
+            if (msg.cookie !== '') {
+                opt.cookie = msg.cookie
+                opt.anonymous = true
+            }
+            GM_xmlhttpRequest(opt);
         }
 
 

@@ -59,7 +59,6 @@ function GiftForm(props) {
 
                                 var ids = props.cookies
 
-                                var cookies = []
                                 var array = []
                                 for (const v of props.cookies) {
                                     array.push(v)
