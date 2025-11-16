@@ -98,7 +98,9 @@ function ChatArea(props) {
             if (event.data.action === "websocket") {
                 //window.removeEventListener("message", handleMessage);
 
-                ws.current = new WebSocket("wss://broadcastlv.chat.bilibili.com:2245/sub");
+                if (!ws.current) {
+                    ws.current = new WebSocket("wss://broadcastlv.chat.bilibili.com:2245/sub");
+                }
 
                 ws.current.onopen = () => {
                     ws.current.send(buildMessage(JSON.stringify({
