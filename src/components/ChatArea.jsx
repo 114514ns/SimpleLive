@@ -98,9 +98,7 @@ function ChatArea(props) {
             if (event.data.action === "websocket") {
                 //window.removeEventListener("message", handleMessage);
 
-                if (!ws.current) {
-                    ws.current = new WebSocket("wss://broadcastlv.chat.bilibili.com:2245/sub");
-                }
+                ws.current = new WebSocket("wss://broadcastlv.chat.bilibili.com:2245/sub")
 
                 ws.current.onopen = () => {
                     ws.current.send(buildMessage(JSON.stringify({
@@ -330,19 +328,6 @@ function ChatArea(props) {
 
                     return [ ...list]
                 })
-                //setEventList(cpy)
-                /*
-                setEventList(prev => {
-                    return prev.map(item => {
-                        const match = array.find(a => a.user.base.face === item.Face);
-                        if (match) {
-                            return { ...item, FromName: match.user.base.name,FromId:match.uid }; // 生成新对象
-                        }
-                        return item; // 保持不变
-                    });
-                });
-
-                 */
             }
         }
 
