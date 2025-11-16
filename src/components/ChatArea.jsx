@@ -84,19 +84,21 @@ function ChatArea(props) {
 
     useEffect(() => {
         console.log("refresh ChatArea")
+
+
+
         window.parent.postMessage({
             "action": "websocket",
             "room": props.room,
             "anonymous":getConfig().Anonymous
         }, "*")
 
+
         function handleMessage(event) {
             if (event.data.action === "websocket") {
                 //window.removeEventListener("message", handleMessage);
 
-                if (ws.current === null || ws.current === undefined) {
-                    ws.current = new WebSocket("wss://broadcastlv.chat.bilibili.com:2245/sub");
-                }
+                ws.current = new WebSocket("wss://broadcastlv.chat.bilibili.com:2245/sub");
 
                 ws.current.onopen = () => {
                     ws.current.send(buildMessage(JSON.stringify({
@@ -354,12 +356,15 @@ function ChatArea(props) {
         },500)
         return () => {
             if (ws.current) {
-                ws.current.close();
+                ws.current.close()
+
+                ws.current = undefined
             }
             if (timer.current) {
                 clearInterval(timer.current);
                 clearInterval(history)
             }
+            window.removeEventListener("message", handleMessage);
             //setEventList([])
         };
     }, [props.room]);
