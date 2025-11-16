@@ -358,9 +358,9 @@ function ChatArea(props) {
         },500)
         return () => {
             if (ws.current) {
-                ws.current.close()
+                //ws.current.close()
 
-                ws.current = undefined
+                //ws.current = undefined
             }
             if (timer.current) {
                 clearInterval(timer.current);
@@ -513,8 +513,6 @@ const CheckIcon = React.memo(({size = 24, color = "currentColor", ...props}) => 
             <use href="#icon-check" fill={color}/>
         </svg>
     );
-});
+})
 
 export default ChatArea;
-
-
